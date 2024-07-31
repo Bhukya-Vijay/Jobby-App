@@ -1,0 +1,52 @@
+.navContainer {
+  background-color: #263868;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 5px;
+}
+
+.logo-container {
+  display: flex;
+  flex-direction: column;
+  margin-left: 20px;
+  padding: 5px;
+}
+.assess {
+  font-family: Futura Md BT;
+  color: white;
+  font-size: 15px;
+}
+.website-logo {
+  color: white;
+  margin-left: 20px;
+  width: 60px;
+  height: 32px;
+  top: 16.33px;
+  left: 59px;
+  gap: 0px;
+  opacity: 0px;
+}
+
+.title {
+  font-family: 'roboto';
+  font-size: 18px;
+  font-style: italic;
+  font-weight: 700;
+  line-height: 24px;
+  letter-spacing: 0.20000000298023224px;
+  text-align: left;
+  color: white;
+  line-height: 0;
+}
+.logoutButton {
+  background-color: transparent;
+  width: 70px;
+  height: 32px;
+  border-width: 1px;
+  border-color: white;
+  color: white;
+  cursor: pointer;
+  border-radius: 5px;
+  margin-right: 20px;
+}

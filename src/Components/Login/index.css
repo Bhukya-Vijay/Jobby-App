@@ -1,0 +1,66 @@
+.loginContainer {
+  height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.loginCard {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 456px;
+  height: 492px;
+  top: 278px;
+  left: 492px;
+  gap: 0px;
+  opacity: 0px;
+  box-shadow: 0px 4px 16px 0px #7b879429;
+  padding: 30px;
+}
+
+.assess {
+  font-family: 'roboto';
+  color: #263868;
+  font-size: 25px;
+}
+.inputContainer {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+.label {
+  font-family: 'Roboto';
+}
+.loginButton {
+  width: 360px;
+  height: 40px;
+  border: none;
+  border-radius: 8px;
+  background: #263868;
+  color: white;
+  cursor: pointer;
+  align-self: flex-start;
+}
+.showPasswordContainer {
+  width: 100;
+  display: flex;
+  flex-direction: row;
+  align-self: flex-start;
+}
+.submitError {
+  font-family: 'Roboto';
+  color: red;
+  align-self: flex-start;
+}
+
+.input {
+  width: 360px;
+  height: 40px;
+  top: 24px;
+  gap: 0px;
+  border-radius: 2px;
+  border: 1px 0px 0px 0px;
+  opacity: 0px;
+  border: 1px solid #d7dfe9;
+}
