@@ -1,6 +1,6 @@
 import {Component} from 'react'
 import Cookies from 'js-cookie'
-import {Redirect, Link} from 'react-router-dom'
+import {Redirect} from 'react-router-dom'
 import Loader from 'react-loader-spinner'
 import './index.css'
 import Header from '../Header'
@@ -13,8 +13,8 @@ class Assessment extends Component {
     answeredQuestions: 0,
     unansweredQuestions: 10,
     score: 0,
+    timeLeft: 600, // Adjust time limit as needed
     answers: {},
-    timeLeft: 6,
     assessmentComplete: false,
     timeUp: false,
     apiStatusSuccess: true,
@@ -51,33 +51,56 @@ class Assessment extends Component {
       },
     }
 
-    // try {
-    const response = await fetch(url, options)
-    const data = await response.json()
-    if (response.ok) {
-      this.setState({
-        questions: data.questions,
-        unansweredQuestions: data.questions.length,
-      })
-    } else {
-      this.setState({apiStatusSuccess: false})
-    }
-    /*  } catch (error) {
+    try {
+      const response = await fetch(url, options)
+      const data = await response.json()
+      if (response.ok) {
+        const answers = {}
+        data.questions.forEach(e => {
+          e.options.forEach(a => {
+            if (a.is_correct === 'true') {
+              answers[a.id] = a.is_correct
+            }
+          })
+        })
+        this.setState({
+          questions: data.questions,
+          unansweredQuestions: data.questions.length,
+          answers,
+        })
+      } else {
+        this.setState({apiStatusSuccess: false})
+      }
+    } catch (error) {
       console.error('Error fetching questions:', error)
-      //     Handle error appropriately (e.g., display an error message)
-    }   */
+      // Handle error appropriately (e.g., display an error message)
+    }
   }
 
-  handleOptionClick = (questionId, isCorrect, optionId) => {
+  handleOptionClick = (
+    questionId,
+    isCorrect,
+    optionId,
+    isSelectQuestion = false,
+  ) => {
     const {answers} = this.state
+    let option
+    if (isSelectQuestion && optionId) {
+      option = optionId.id
+    }
+    console.log(1, optionId, option)
 
+    if (isSelectQuestion && !option) {
+      return
+    }
+    console.log(2, optionId, option)
     if (!answers[questionId]) {
       this.setState(prevState => ({
         answers: {...prevState.answers, [questionId]: isCorrect},
         answeredQuestions: prevState.answeredQuestions + 1,
         unansweredQuestions: prevState.unansweredQuestions - 1,
         score: isCorrect === 'true' ? prevState.score + 1 : prevState.score,
-        selectedOptionId: optionId,
+        selectedOptionId: isSelectQuestion ? option : optionId,
       }))
     }
   }
@@ -86,7 +109,7 @@ class Assessment extends Component {
     this.setState(prevState => {
       const nextIndex = prevState.currentQuestionIndex + 1
       if (nextIndex < prevState.questions.length) {
-        return {currentQuestionIndex: nextIndex, selectedOption: ''}
+        return {currentQuestionIndex: nextIndex}
       }
       return null
     })
@@ -96,7 +119,7 @@ class Assessment extends Component {
     this.setState(prevState => {
       const prevIndex = prevState.currentQuestionIndex - 1
       if (prevIndex >= 0) {
-        return {currentQuestionIndex: prevIndex, selectedOption: ''}
+        return {currentQuestionIndex: prevIndex}
       }
       return null
     })
@@ -115,7 +138,8 @@ class Assessment extends Component {
         answeredQuestions: 0,
         unansweredQuestions: 10,
         score: 0,
-        timeLeft: 600, // Adjust time limit as needed
+        timeLeft: 6, // Adjust time limit as needed
+        answers: {},
         assessmentComplete: false,
         timeUp: false,
         selectedOptionId: '',
@@ -133,6 +157,7 @@ class Assessment extends Component {
       score,
       assessmentComplete,
       timeUp,
+      answers,
       apiStatusSuccess,
       selectedOptionId,
     } = this.state
@@ -140,6 +165,8 @@ class Assessment extends Component {
     const questionNumber = currentQuestionIndex
     const jwtToken = Cookies.get('jwt_token')
     const total = questions.length
+    const selectDefaultLabel = 'select an answer'
+    console.log(answers)
 
     if (jwtToken === undefined) {
       return <Redirect to="/login" />
@@ -181,7 +208,6 @@ class Assessment extends Component {
                   {questionNumber + 1}. {currentQuestion.question_text}
                 </p>
               </li>
-              <hr className="question-line" />
               <div className="answer-options">
                 <ul className="single-select-options-container">
                   {currentQuestion.options_type === 'SINGLE_SELECT' && (
@@ -191,10 +217,16 @@ class Assessment extends Component {
                         this.handleOptionClick(
                           currentQuestion.id,
                           event.target.value,
+                          currentQuestion.options.find(
+                            e =>
+                              e.text === event.target.selectedOptions[0].label,
+                          ),
+                          true,
                         )
                       }
                       className="single-select-options"
                     >
+                      <option>{selectDefaultLabel}</option>
                       {currentQuestion.options.map(option => (
                         <option
                           key={option.id}
@@ -223,7 +255,14 @@ class Assessment extends Component {
                           )
                         }
                       >
-                        <button type="button">{option.text}</button>
+                        <button
+                          type="button"
+                          className={`default-option ${
+                            selectedOptionId === option.id ? 'checked' : ''
+                          }`}
+                        >
+                          {option.text}
+                        </button>
                       </li>
                     ))}
                 </ul>
@@ -295,7 +334,7 @@ class Assessment extends Component {
                 </div>
                 <hr className="line" />
                 <h1>Questions ({total})</h1>
-                <div className="questions-list">
+                <div className="question-list">
                   {questions.map((question, index) => (
                     <button
                       type="button"
@@ -311,15 +350,13 @@ class Assessment extends Component {
                     </button>
                   ))}
                 </div>
-                <Link to="/results">
-                  <button
-                    type="button"
-                    className="submit-assessment-btn"
-                    onClick={this.handleSubmit}
-                  >
-                    Submit Assessment
-                  </button>
-                </Link>
+                <button
+                  type="button"
+                  className="submit-assessment-btn"
+                  onClick={this.handleSubmit}
+                >
+                  Submit Assessment
+                </button>
               </div>
             </div>
           </div>
@@ -341,3 +378,4 @@ class Assessment extends Component {
 }
 
 export default Assessment
+
